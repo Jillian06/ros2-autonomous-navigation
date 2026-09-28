@@ -19,7 +19,7 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Jillian Yang',
-    maintainer_email='jillianwang16@gmail.com',
+    maintainer_email='145163025+Jillian06@users.noreply.github.com',
     description='Custom A* planner and path follower for ROS 2.',
     license='MIT',
     entry_points={'console_scripts': [
