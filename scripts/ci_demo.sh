@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # Run only on a full Ubuntu 24.04 runner with ROS 2 Jazzy and Gazebo Harmonic.
-set -euo pipefail
+set -eo pipefail
 source /opt/ros/jazzy/setup.bash
 colcon build --symlink-install --base-paths autonomous_navigation
 source install/setup.bash
+set -u
 mkdir -p media
 export DISPLAY=:99 LIBGL_ALWAYS_SOFTWARE=1 QT_X11_NO_MITSHM=1
 Xvfb :99 -screen 0 1280x900x24 -nolisten tcp >/tmp/xvfb.log 2>&1 &
