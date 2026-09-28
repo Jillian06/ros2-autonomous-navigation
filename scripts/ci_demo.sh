@@ -15,15 +15,16 @@ launch_pid=$!
 cleanup() { kill "$launch_pid" "$x_pid" 2>/dev/null || true; }
 trap cleanup EXIT
 sleep 10
+{ ros2 topic list; timeout 8 gz topic -l; } >media/topics.log 2>&1 || true
 /usr/bin/python3 scripts/record_demo.py --duration 120 --output media/demo_results.json &
 observer_pid=$!
 # A real capture of the virtual display. A video frame becomes the still image.
 ffmpeg -hide_banner -loglevel error -y -f x11grab -framerate 5 -video_size 1280x900 -i :99 -t 16 \
-  -vf 'scale=900:-1:flags=lanczos' -c:v libx264 -preset ultrafast -pix_fmt yuv420p /tmp/gazebo.mp4
+  -vf 'scale=900:-2:flags=lanczos' -c:v libx264 -preset ultrafast -pix_fmt yuv420p /tmp/gazebo.mp4
 ffmpeg -hide_banner -loglevel error -y -ss 7 -i /tmp/gazebo.mp4 -frames:v 1 media/gazebo_demo.png
-ffmpeg -hide_banner -loglevel error -y -i /tmp/gazebo.mp4 -vf 'fps=5,scale=900:-1:flags=lanczos,palettegen' /tmp/palette.png
+ffmpeg -hide_banner -loglevel error -y -i /tmp/gazebo.mp4 -vf 'fps=5,scale=900:-2:flags=lanczos,palettegen' /tmp/palette.png
 ffmpeg -hide_banner -loglevel error -y -i /tmp/gazebo.mp4 -i /tmp/palette.png \
-  -lavfi 'fps=5,scale=900:-1:flags=lanczos[x];[x][1:v]paletteuse' media/gazebo_demo.gif
+  -lavfi 'fps=5,scale=900:-2:flags=lanczos[x];[x][1:v]paletteuse' media/gazebo_demo.gif
 wait "$observer_pid"
 /usr/bin/python3 scripts/render_trajectory.py media/demo_results.json --output media/trajectory.png
 /usr/bin/python3 - <<'PY'

@@ -32,4 +32,5 @@ jobs:
             media/gazebo_demo.png
             media/gazebo_demo.gif
             media/launch.log
+            media/topics.log
           if-no-files-found: warn
