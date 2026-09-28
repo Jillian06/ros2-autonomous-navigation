@@ -1,4 +1,4 @@
-from lsy_autonomous_navigation.planning import astar
+from autonomous_navigation.planning import astar
 
 def test_open_grid():
     grid = [0] * 25
@@ -18,3 +18,10 @@ def test_blocked_goal():
     grid = [0] * 9
     grid[8] = 100
     assert astar(grid, 3, 3, (0, 0), (2, 2)) is None
+
+def test_diagonal_corner_cut_is_rejected():
+    # Start is boxed from diagonal motion by two occupied cardinal cells.
+    grid = [0] * 9
+    grid[1] = 100
+    grid[3] = 100
+    assert astar(grid, 3, 3, (0, 0), (1, 1)) is None

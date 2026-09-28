@@ -2,7 +2,7 @@ from setuptools import find_packages, setup
 from glob import glob
 import os
 
-package_name = 'lsy_autonomous_navigation'
+package_name = 'autonomous_navigation'
 
 setup(
     name=package_name,
@@ -19,15 +19,13 @@ setup(
     install_requires=['setuptools'],
     zip_safe=True,
     maintainer='Jillian Yang',
-    maintainer_email='maintainer@example.com',
+    maintainer_email='145163025+Jillian06@users.noreply.github.com',
     description='Custom A* planner and path follower for ROS 2.',
     license='MIT',
-    entry_points={
-        'console_scripts': [
-            'astar_planner = lsy_autonomous_navigation.astar_planner_node:main',
-            'path_follower = lsy_autonomous_navigation.path_follower_node:main',
-            'demo_map = lsy_autonomous_navigation.demo_map_node:main',
-            'demo_goal = lsy_autonomous_navigation.demo_goal_node:main',
-        ],
-    },
+    entry_points={'console_scripts': [
+        'astar_planner = autonomous_navigation.astar_planner_node:main',
+        'path_follower = autonomous_navigation.path_follower_node:main',
+        'demo_map = autonomous_navigation.demo_map_node:main',
+        'demo_goal = autonomous_navigation.demo_goal_node:main',
+    ]},
 )

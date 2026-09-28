@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<sdf version="1.9"><model name="lsy_bot"><pose>0 0 0.18 0 0 0</pose>
+<sdf version="1.9"><model name="autonomy_bot"><pose>0 0 0.18 0 0 0</pose>
 <link name="base_link"><inertial><mass>5</mass><inertia><ixx>0.08</ixx><iyy>0.08</iyy><izz>0.10</izz></inertia></inertial><collision name="c"><geometry><box><size>0.45 0.32 0.18</size></box></geometry></collision><visual name="v"><geometry><box><size>0.45 0.32 0.18</size></box></geometry></visual></link>
 <link name="left_wheel"><pose>0 0.19 -0.08 1.5708 0 0</pose><collision name="c"><geometry><cylinder><radius>0.09</radius><length>0.04</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.09</radius><length>0.04</length></cylinder></geometry></visual></link>
 <link name="right_wheel"><pose>0 -0.19 -0.08 1.5708 0 0</pose><collision name="c"><geometry><cylinder><radius>0.09</radius><length>0.04</length></cylinder></geometry></collision><visual name="v"><geometry><cylinder><radius>0.09</radius><length>0.04</length></cylinder></geometry></visual></link>

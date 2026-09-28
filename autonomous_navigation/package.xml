@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <package format="3">
-  <name>lsy_autonomous_navigation</name>
+  <name>autonomous_navigation</name>
   <version>0.1.0</version>
   <description>ROS 2 A* planning and feedback path-following portfolio project.</description>
-  <maintainer email="maintainer@example.com">Jillian Yang</maintainer>
+  <maintainer email="145163025+Jillian06@users.noreply.github.com">Jillian Yang</maintainer>
   <license>MIT</license>
   <buildtool_depend>ament_python</buildtool_depend>
   <exec_depend>rclpy</exec_depend>
