@@ -33,4 +33,5 @@ jobs:
             media/gazebo_demo.gif
             media/launch.log
             media/topics.log
+            media/odom_diagnostics.log
           if-no-files-found: warn

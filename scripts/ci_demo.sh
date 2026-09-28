@@ -16,6 +16,12 @@ cleanup() { kill "$launch_pid" "$x_pid" 2>/dev/null || true; }
 trap cleanup EXIT
 sleep 10
 { ros2 topic list; timeout 8 gz topic -l; } >media/topics.log 2>&1 || true
+{
+  ros2 topic info -v /odom
+  timeout 5 gz topic -i -t /model/autonomy_bot/odometry || true
+  timeout 5 gz topic -e -t /model/autonomy_bot/odometry || true
+  timeout 5 ros2 topic echo /odom --once || true
+} >media/odom_diagnostics.log 2>&1
 /usr/bin/python3 scripts/record_demo.py --duration 120 --output media/demo_results.json &
 observer_pid=$!
 # A real capture of the virtual display. A video frame becomes the still image.
