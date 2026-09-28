@@ -1,4 +1,48 @@
-<?xml version="1.0"?><sdf version="1.9"><world name="demo"><plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/><plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/><plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors"><render_engine>ogre2</render_engine></plugin><gravity>0 0 -9.8</gravity><include><uri>model://ground_plane</uri></include><include><uri>model://sun</uri></include>
-<model name="wall1" static="true"><pose>-1.25 -1.1 0.5 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.5 5.5 1</size></box></geometry></collision><visual name="v"><geometry><box><size>0.5 5.5 1</size></box></geometry></visual></link></model>
-<model name="wall2" static="true"><pose>1.45 1.8 0.5 0 0 0</pose><link name="l"><collision name="c"><geometry><box><size>0.5 5.5 1</size></box></geometry></collision><visual name="v"><geometry><box><size>0.5 5.5 1</size></box></geometry></visual></link></model>
-</world></sdf>
+<?xml version="1.0"?>
+<sdf version="1.9">
+  <world name="demo">
+    <plugin filename="gz-sim-physics-system" name="gz::sim::systems::Physics"/>
+    <plugin filename="gz-sim-user-commands-system" name="gz::sim::systems::UserCommands"/>
+    <plugin filename="gz-sim-sensors-system" name="gz::sim::systems::Sensors">
+      <render_engine>ogre2</render_engine>
+    </plugin>
+    <gravity>0 0 -9.8</gravity>
+    <light name="sun" type="directional">
+      <pose>0 0 10 0 0 0</pose>
+      <diffuse>0.9 0.9 0.9 1</diffuse>
+      <specular>0.2 0.2 0.2 1</specular>
+      <direction>-0.5 -0.5 -1</direction>
+    </light>
+    <model name="ground" static="true">
+      <link name="ground_link">
+        <collision name="ground_collision">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+        </collision>
+        <visual name="ground_visual">
+          <geometry><plane><normal>0 0 1</normal><size>20 20</size></plane></geometry>
+          <material><ambient>0.7 0.7 0.7 1</ambient><diffuse>0.7 0.7 0.7 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="wall1" static="true">
+      <pose>-1.25 -1.1 0.5 0 0 0</pose>
+      <link name="wall_link">
+        <collision name="collision"><geometry><box><size>0.5 5.5 1</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.5 5.5 1</size></box></geometry>
+          <material><ambient>0.25 0.35 0.65 1</ambient><diffuse>0.25 0.35 0.65 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+    <model name="wall2" static="true">
+      <pose>1.45 1.8 0.5 0 0 0</pose>
+      <link name="wall_link">
+        <collision name="collision"><geometry><box><size>0.5 5.5 1</size></box></geometry></collision>
+        <visual name="visual">
+          <geometry><box><size>0.5 5.5 1</size></box></geometry>
+          <material><ambient>0.25 0.35 0.65 1</ambient><diffuse>0.25 0.35 0.65 1</diffuse></material>
+        </visual>
+      </link>
+    </model>
+  </world>
+</sdf>

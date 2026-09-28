@@ -1,21 +1,25 @@
 import math
 import rclpy
 from rclpy.node import Node
+from rclpy.qos import DurabilityPolicy, QoSProfile, ReliabilityPolicy
 from geometry_msgs.msg import Twist
 from nav_msgs.msg import Odometry, Path
 from .control import velocity_command
 class PathFollowerNode(Node):
     def __init__(self):
-        super().__init__('path_follower'); self.path=[]; self.odom=None; self.lookahead=0.30; self.goal_tolerance=0.10
-        self.create_subscription(Path,'/planned_path',self.path_cb,10); self.create_subscription(Odometry,'/odom',self.odom_cb,20)
+        super().__init__('path_follower'); self.path=[]; self.odom=None; self.lookahead=0.30; self.goal_tolerance=0.10; self.path_index=0
+        latched=QoSProfile(depth=1,reliability=ReliabilityPolicy.RELIABLE,durability=DurabilityPolicy.TRANSIENT_LOCAL)
+        self.create_subscription(Path,'/planned_path',self.path_cb,latched); self.create_subscription(Odometry,'/odom',self.odom_cb,20)
         self.cmd_pub=self.create_publisher(Twist,'/cmd_vel',10); self.timer=self.create_timer(0.05,self.control_step)
-    def path_cb(self,msg): self.path=[(p.pose.position.x,p.pose.position.y) for p in msg.poses]
+    def path_cb(self,msg):
+        self.path=[(p.pose.position.x,p.pose.position.y) for p in msg.poses]; self.path_index=0
     def odom_cb(self,msg): self.odom=msg
     @staticmethod
     def yaw_from_quaternion(q): return math.atan2(2.0*(q.w*q.z+q.x*q.y),1.0-2.0*(q.y*q.y+q.z*q.z))
     def choose_target(self,x,y):
         if not self.path: return None
-        for px,py in self.path:
+        self.path_index=min(range(self.path_index,len(self.path)),key=lambda i: math.hypot(self.path[i][0]-x,self.path[i][1]-y))
+        for px,py in self.path[self.path_index:]:
             if math.hypot(px-x,py-y)>=self.lookahead: return px,py
         return self.path[-1]
     def stop(self): self.cmd_pub.publish(Twist())
