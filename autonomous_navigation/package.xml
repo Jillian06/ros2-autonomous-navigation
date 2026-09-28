@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>autonomous_navigation</name>
+  <version>0.1.0</version>
+  <description>ROS 2 A* planning and feedback path-following portfolio project.</description>
+  <maintainer email="jillianwang16@gmail.com">Jillian Yang</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+  <exec_depend>rclpy</exec_depend>
+  <exec_depend>nav_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+  <test_depend>ament_pytest</test_depend>
+  <test_depend>python3-pytest</test_depend>
+</package>
