@@ -22,7 +22,7 @@ sleep 10
   timeout 5 gz topic -e -t /model/autonomy_bot/odometry || true
   timeout 5 ros2 topic echo /odom --once || true
 } >media/odom_diagnostics.log 2>&1
-/usr/bin/python3 scripts/record_demo.py --duration 120 --output media/demo_results.json &
+/usr/bin/python3 scripts/record_demo.py --duration "${DEMO_DURATION:-120}" --output media/demo_results.json &
 observer_pid=$!
 # A real capture of the virtual display. A video frame becomes the still image.
 ffmpeg -hide_banner -loglevel error -y -f x11grab -framerate 5 -video_size 1280x900 -i :99 -t 16 \
