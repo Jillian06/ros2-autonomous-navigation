@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+install/
+log/
+*.egg-info/
+.vscode/
+.idea/
+.DS_Store
