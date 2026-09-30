@@ -16,7 +16,7 @@ def main():
         run = json.load(f)
     planned = run['planned_path_xy_m']
     actual = run['ground_truth_trajectory_xy_m']
-    wheel = run['trajectory_xy_m']
+    wheel = run['wheel_trajectory_xy_m']
     if not planned or len(actual) < 2:
         raise ValueError('Recording has no planned path or moving odometry')
 

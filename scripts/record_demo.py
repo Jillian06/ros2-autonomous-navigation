@@ -20,12 +20,14 @@ class DemoObserver(Node):
                              durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.create_subscription(Odometry, '/odom', self.on_odom, 10)
         self.create_subscription(Odometry, '/ground_truth', self.on_truth, 10)
+        self.create_subscription(Odometry, '/wheel_odom', self.on_wheel, 10)
         self.create_subscription(LaserScan, '/scan', self.on_scan, 10)
         self.create_subscription(Path, '/planned_path', self.on_path, latched)
         self.create_subscription(PoseStamped, '/goal_pose', self.on_goal, latched)
         self.create_subscription(Twist, '/cmd_vel', self.on_cmd, 10)
         self.poses = []
         self.truth_poses = []
+        self.wheel_poses = []
         self.goal = None
         self.path_poses = 0
         self.path_xy = []
@@ -38,6 +40,10 @@ class DemoObserver(Node):
     def on_odom(self, msg):
         p = msg.pose.pose.position
         self.poses.append((time.monotonic(), p.x, p.y))
+
+    def on_wheel(self, msg):
+        p = msg.pose.pose.position
+        self.wheel_poses.append((time.monotonic(), p.x, p.y))
 
     def on_truth(self, msg):
         p = msg.pose.pose.position
@@ -97,6 +103,8 @@ def main():
             'ground_truth_messages': len(observer.truth_poses),
             'ground_truth_end_xy_m': list(observer.truth_poses[-1][1:]) if observer.truth_poses else None,
             'ground_truth_trajectory_xy_m': [[round(x, 3), round(y, 3)] for _, x, y in observer.truth_poses[::max(1, len(observer.truth_poses)//300)]],
+            'wheel_odom_messages': len(self_wheel := observer.wheel_poses),
+            'wheel_trajectory_xy_m': [[round(x, 3), round(y, 3)] for _, x, y in self_wheel[::max(1, len(self_wheel)//300)]],
             'odom_messages': len(poses),
             'path_poses': observer.path_poses,
             'planned_path_xy_m': [[round(x, 3), round(y, 3)] for x, y in observer.path_xy],
@@ -110,7 +118,7 @@ def main():
         with open(args.output, 'w', encoding='utf-8') as f:
             json.dump(result, f, indent=2)
             f.write('\n')
-        print(json.dumps({k: v for k, v in result.items() if k not in ('trajectory_xy_m', 'planned_path_xy_m')}, indent=2))
+        print(json.dumps({k: v for k, v in result.items() if k not in ('trajectory_xy_m', 'planned_path_xy_m', 'ground_truth_trajectory_xy_m', 'wheel_trajectory_xy_m')}, indent=2))
         observer.destroy_node()
         rclpy.shutdown()
 

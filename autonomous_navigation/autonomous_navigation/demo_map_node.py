@@ -12,7 +12,7 @@ class DemoMap(Node):
                 for x in range(x0,x1): data[y*w+x]=100
         block(0,0,w,2); block(0,h-2,w,h); block(0,0,2,h); block(w-2,0,w,h)
         # Approximate the two Gazebo walls with robot-footprint clearance.
-        block(42,18,53,80); block(69,37,80,108)
+        block(42,18,53,80); block(67,44,82,112)
         msg=OccupancyGrid(); msg.header.stamp=self.get_clock().now().to_msg(); msg.header.frame_id='odom'; msg.info.resolution=res; msg.info.width=w; msg.info.height=h
         msg.info.origin.position.x=-6.0; msg.info.origin.position.y=-6.0; msg.info.origin.orientation.w=1.0; msg.data=data; self.pub.publish(msg); self.timer.cancel()
 def main(args=None):
