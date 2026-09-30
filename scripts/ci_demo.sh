@@ -44,5 +44,7 @@ for key in ('path_poses', 'scan_messages', 'nonzero_cmd_messages', 'final_goal_e
 assert result['path_poses'] > 2, 'No A* path was published'
 assert result['scan_messages'] > 0 and result['finite_scan_samples'] > 0, 'No LiDAR scan'
 assert result['nonzero_cmd_messages'] > 10, 'Robot never received movement commands'
-assert result['goal_reached_within_0_15_m'], 'Robot did not reach the goal'
+assert result['goal_reached_within_0_15_m'], 'Wheel odometry or physical robot did not reach goal'
+assert result['ground_truth_messages'] > 10, 'No physical world pose received'
+assert result['ground_truth_goal_error_m'] < 0.20, 'Physical robot did not reach goal'
 PY

@@ -19,11 +19,13 @@ class DemoObserver(Node):
         latched = QoSProfile(depth=1, reliability=ReliabilityPolicy.RELIABLE,
                              durability=DurabilityPolicy.TRANSIENT_LOCAL)
         self.create_subscription(Odometry, '/odom', self.on_odom, 10)
+        self.create_subscription(Odometry, '/ground_truth', self.on_truth, 10)
         self.create_subscription(LaserScan, '/scan', self.on_scan, 10)
         self.create_subscription(Path, '/planned_path', self.on_path, latched)
         self.create_subscription(PoseStamped, '/goal_pose', self.on_goal, latched)
         self.create_subscription(Twist, '/cmd_vel', self.on_cmd, 10)
         self.poses = []
+        self.truth_poses = []
         self.goal = None
         self.path_poses = 0
         self.path_xy = []
@@ -36,6 +38,10 @@ class DemoObserver(Node):
     def on_odom(self, msg):
         p = msg.pose.pose.position
         self.poses.append((time.monotonic(), p.x, p.y))
+
+    def on_truth(self, msg):
+        p = msg.pose.pose.position
+        self.truth_poses.append((time.monotonic(), p.x, p.y))
 
     def on_scan(self, msg):
         self.scans += 1
@@ -72,7 +78,8 @@ def main():
             if observer.poses and observer.goal:
                 _, x, y = observer.poses[-1]
                 stopped = observer.last_cmd is not None and max(map(abs, observer.last_cmd)) < 1e-4
-                if observer.nonzero_cmds and stopped and math.hypot(x-observer.goal[0], y-observer.goal[1]) < 0.15:
+                truth_ok = observer.truth_poses and math.hypot(observer.truth_poses[-1][1]-observer.goal[0], observer.truth_poses[-1][2]-observer.goal[1]) < 0.20
+                if observer.nonzero_cmds and stopped and truth_ok and math.hypot(x-observer.goal[0], y-observer.goal[1]) < 0.15:
                     reached = True
                     break
     finally:
@@ -86,6 +93,10 @@ def main():
             'start_xy_m': list(poses[0][1:]) if poses else None,
             'end_xy_m': list(poses[-1][1:]) if poses else None,
             'final_goal_error_m': round(math.hypot(poses[-1][1]-goal[0], poses[-1][2]-goal[1]), 3) if poses and goal else None,
+            'ground_truth_goal_error_m': round(math.hypot(observer.truth_poses[-1][1]-goal[0], observer.truth_poses[-1][2]-goal[1]), 3) if observer.truth_poses and goal else None,
+            'ground_truth_messages': len(observer.truth_poses),
+            'ground_truth_end_xy_m': list(observer.truth_poses[-1][1:]) if observer.truth_poses else None,
+            'ground_truth_trajectory_xy_m': [[round(x, 3), round(y, 3)] for _, x, y in observer.truth_poses[::max(1, len(observer.truth_poses)//300)]],
             'odom_messages': len(poses),
             'path_poses': observer.path_poses,
             'planned_path_xy_m': [[round(x, 3), round(y, 3)] for x, y in observer.path_xy],
