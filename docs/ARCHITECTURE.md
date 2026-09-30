@@ -1,41 +1,51 @@
 # Architecture
 
-The project separates simulator-independent algorithms from ROS 2 integration.
+The demo connects a custom A* planner and feedback controller to a live Gazebo differential-drive robot through ROS 2.
 
-```text
-                           +-------------------+
-                           |   Goal Pose       |
-                           +---------+---------+
-                                     |
-                                     v
-+------------------+       +---------+---------+       +------------------+
-| Occupancy Grid   | ----> | Custom A* Planner| ----> | nav_msgs/Path    |
-+------------------+       +---------+---------+       +---------+--------+
-                                     ^                           |
-                                     |                           v
-+------------------+                 |                 +---------+--------+
-| Gazebo Robot     | -- odometry ----+---------------->| Path Follower    |
-| Diff drive/LiDAR |                                   +---------+--------+
-+--------+---------+                                             |
-         ^                                                       v
-         +------------------------ /cmd_vel <---------------------+
-         |
-         +---- /scan (sensor interface / extension hook)
+```mermaid
+flowchart TB
+  inputs["Known occupancy grid + goal"] --> planner["Custom A* planner"]
+  planner -->|"/planned_path"| follower["Feedback path follower"]
+  follower -->|"/cmd_vel"| bridge["ROS–Gazebo bridge"]
+  bridge --> robot["Gazebo differential-drive robot"]
+  robot -->|"/odom"| bridge
+  bridge -->|"/odom"| planner
+  bridge -->|"/odom"| follower
+  robot --> lidar["360° simulated LiDAR"]
+  lidar -->|"/scan via bridge"| observer["Run observer"]
+  planner --> observer
+  bridge --> observer
 ```
 
-## Design choices
+## Interfaces
 
-### Custom global planner
-The planner is implemented independently of Nav2 to make the algorithmic behavior inspectable and testable. It operates on an occupancy grid and supports 8-connected motion.
+| ROS topic | Type | Role |
+| --- | --- | --- |
+| /map | nav_msgs/OccupancyGrid | Known map with inflated wall obstacles |
+| /goal_pose | geometry_msgs/PoseStamped | Requested goal (4.5, 4.0) m |
+| /planned_path | nav_msgs/Path | 8-connected A* result in the odom frame |
+| /odom | nav_msgs/Odometry | Gazebo world pose used as ideal simulation localization |
+| /cmd_vel | geometry_msgs/Twist | Bounded linear and angular commands |
+| /scan | sensor_msgs/LaserScan | Live 360° LiDAR ranges from Gazebo |
+| /ground_truth | nav_msgs/Odometry | Gazebo world pose for physical goal validation |
+| /wheel_odom | nav_msgs/Odometry | DiffDrive wheel odometry for comparison |
 
-### Corner-cut prevention
-A diagonal transition is rejected when either adjacent cardinal cell is occupied. This prevents a point-grid planner from producing paths that pass through obstacle corners.
+The bridge sends ROS /cmd_vel to Gazebo /cmd_vel, exposes Gazebo /scan as ROS /scan, and exposes Gazebo /ground_truth as both ROS /odom and /ground_truth. DiffDrive publishes /wheel_odom separately. All planner/controller coordinates use the odom frame.
 
-### Controller
-The baseline path follower uses a look-ahead waypoint and proportional distance/heading feedback. It is intentionally small enough to inspect and replace with PID, pure pursuit, MPC, or a learned policy.
+## Planning and control
 
-### Simulation boundary
-Gazebo provides differential-drive dynamics, odometry, and a 2-D LiDAR. `ros_gz_bridge` connects simulator topics to ROS 2.
+The planner rejects occupied cells and diagonal corner cutting. The demo map adds clearance around the physical walls. Map, goal, and path use reliable transient-local QoS so late subscribers can receive them. Planning waits for all three inputs, including odometry arriving after the goal.
 
-## Current scope
-The included demo uses a known occupancy grid. SLAM, AMCL/EKF localization, local costmaps, and dynamic obstacle avoidance are not claimed as implemented features.
+The controller follows forward look-ahead waypoints using distance and wrapped heading error. Its waypoint index progresses along the path, and it publishes zero velocity when the final waypoint is within 0.10 m.
+
+## Sensing and scope
+
+LiDAR is simulated, bridged to ROS, and checked for finite returns during the run. Planning uses the supplied occupancy grid; scans do not currently update the map or drive local avoidance. Gazebo world pose supplies ideal simulation localization feedback. Wheel odometry is logged separately and can drift under slip; no state estimator is implemented. SLAM, AMCL/EKF localization, dynamic obstacle avoidance, and physical-robot deployment remain future work.
+
+## Physical model
+
+Wheel axes are expressed in the model frame so the rotated cylindrical wheel links turn about the vehicle y-axis. Low-friction front/rear supports keep the chassis balanced. An independent Gazebo OdometryPublisher reports world pose; it provides ideal simulation localization to the controller and verifies physical arrival. This isolates planning/control integration from localization-estimator development.
+
+## Evidence
+
+`scripts/record_demo.py` subscribes before simulation launch and records actual ROS messages. `scripts/render_trajectory.py` plots the received path, wheel odometry, and independent Gazebo world pose against the world walls. `scripts/ci_demo.sh` captures the Gazebo desktop through Xvfb/ffmpeg and validates the recorded result. See [testing and validation](TESTING.md).
