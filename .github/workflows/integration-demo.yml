@@ -1,8 +1,9 @@
 name: ROS 2 Gazebo integration demo
 
 on:
+  pull_request:
   push:
-    branches: [demo-validation]
+    branches: [main]
   workflow_dispatch:
 
 jobs:
